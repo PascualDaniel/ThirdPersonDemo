@@ -9,10 +9,13 @@ public class MovingSphere : MonoBehaviour
     float maxSpeed = 10f;
 
     [SerializeField, Range(0f, 100f)]
-    float maxAcceleration = 10f;
+    float maxAcceleration = 10f, maxAirAcceleration = 1f;
 
 	[SerializeField, Range(0f, 10f)]
 	float jumpHeight = 2f;
+
+	[SerializeField, Range(0, 5)]
+	int maxAirJumps = 0;
 
     Vector3 velocity, desiredVelocity;
 
@@ -20,6 +23,7 @@ public class MovingSphere : MonoBehaviour
 
 	bool desiredJump;
 	bool onGround;
+	int jumpPhase;
 
 	void Awake () {
 		body = GetComponent<Rigidbody>();
@@ -37,9 +41,9 @@ public class MovingSphere : MonoBehaviour
 			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
 	}
     void FixedUpdate () {
-        velocity = body.velocity;
-
-        float maxSpeedChange = maxAcceleration * Time.deltaTime;
+		UpdateState();
+        float acceleration = onGround ? maxAcceleration : maxAirAcceleration;
+		float maxSpeedChange = acceleration * Time.deltaTime;
 
         velocity.x =
 			Mathf.MoveTowards(velocity.x, desiredVelocity.x, maxSpeedChange);
@@ -54,15 +58,35 @@ public class MovingSphere : MonoBehaviour
 		onGround = false;
     }
 	void Jump() {
-		if (onGround) {
-			velocity.y += Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
+		if (onGround || jumpPhase < maxAirJumps) {
+			jumpPhase += 1;
+			float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
+			if (velocity.y > 0f) {
+				jumpSpeed = Mathf.Max(jumpSpeed - velocity.y, 0f);
+			}
+			velocity.y += jumpSpeed;
 		}
 	}
-	void OnCollisionEnter () {
-		onGround = true;
+	void OnCollisionEnter (Collision collision) {
+	
+		EvaluateCollision(collision);
 	}
 
-	void OnCollisionStay () {
-		onGround = true;
+	void OnCollisionStay (Collision collision) {
+	
+		EvaluateCollision(collision);
+	}
+	
+	void EvaluateCollision (Collision collision) {
+		for (int i = 0; i < collision.contactCount; i++) {
+			Vector3 normal = collision.GetContact(i).normal;
+			onGround |= normal.y >= 0.9f;
+		}
+	}
+	void UpdateState () {
+		velocity = body.velocity;
+		if (onGround) {
+			jumpPhase = 0;
+		}
 	}
 }

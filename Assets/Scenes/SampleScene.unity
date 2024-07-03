@@ -336,6 +336,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c97229192115efa48b479029e51a3ecb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 41.3
+  maxAcceleration: 10
 --- !u!96 &713911080
 TrailRenderer:
   serializedVersion: 3
@@ -345,7 +347,7 @@ TrailRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 713911074}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -382,7 +384,7 @@ TrailRenderer:
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 1
+    widthMultiplier: 0.1
     widthCurve:
       serializedVersion: 2
       m_Curve:

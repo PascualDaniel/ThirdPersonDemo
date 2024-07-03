@@ -11,9 +11,15 @@ public class MovingSphere : MonoBehaviour
     [SerializeField, Range(0f, 100f)]
     float maxAcceleration = 10f;
 
+	[SerializeField, Range(0f, 10f)]
+	float jumpHeight = 2f;
+
     Vector3 velocity, desiredVelocity;
 
     Rigidbody body;
+
+	bool desiredJump;
+	bool onGround;
 
 	void Awake () {
 		body = GetComponent<Rigidbody>();
@@ -22,7 +28,9 @@ public class MovingSphere : MonoBehaviour
 		Vector2 playerInput;
 		playerInput.x = Input.GetAxis("Horizontal");
 		playerInput.y = Input.GetAxis("Vertical");
+		desiredJump |= Input.GetButtonDown("Jump");
 		playerInput = Vector2.ClampMagnitude(playerInput, 1f);
+		
 
 		//Vector3 desiredVelocity =
 		desiredVelocity =
@@ -38,6 +46,23 @@ public class MovingSphere : MonoBehaviour
 		velocity.z =
 			Mathf.MoveTowards(velocity.z, desiredVelocity.z, maxSpeedChange);
 
+		if (desiredJump) {
+			desiredJump = false;
+			Jump();
+		}
         body.velocity = velocity;
+		onGround = false;
     }
+	void Jump() {
+		if (onGround) {
+			velocity.y += Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
+		}
+	}
+	void OnCollisionEnter () {
+		onGround = true;
+	}
+
+	void OnCollisionStay () {
+		onGround = true;
+	}
 }

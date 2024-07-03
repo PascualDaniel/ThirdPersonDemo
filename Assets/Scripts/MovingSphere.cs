@@ -11,25 +11,26 @@ public class MovingSphere : MonoBehaviour
     [SerializeField, Range(0f, 100f)]
     float maxAcceleration = 10f;
 
-    Vector3 velocity;
+    Vector3 velocity, desiredVelocity;
 
     Rigidbody body;
 
 	void Awake () {
 		body = GetComponent<Rigidbody>();
 	}
-    void Update()
-    {
-        Vector2 playerInput;
-        playerInput.x = Input.GetAxis("Horizontal");
-        playerInput.y = Input.GetAxis("Vertical");
-        playerInput = Vector2.ClampMagnitude(playerInput, 1f);
+    void Update () {
+		Vector2 playerInput;
+		playerInput.x = Input.GetAxis("Horizontal");
+		playerInput.y = Input.GetAxis("Vertical");
+		playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
-        Vector3 desiredVelocity =
-            new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
-
+		//Vector3 desiredVelocity =
+		desiredVelocity =
+			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
+	}
+    void FixedUpdate () {
         velocity = body.velocity;
-            
+
         float maxSpeedChange = maxAcceleration * Time.deltaTime;
 
         velocity.x =

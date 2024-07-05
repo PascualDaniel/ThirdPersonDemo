@@ -17,6 +17,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField, Range(0, 5)]
 	int maxAirJumps = 0;
 
+	[SerializeField, Range(0f, 90f)]
+	float maxGroundAngle = 25f;
+
     Vector3 velocity, desiredVelocity;
 
     Rigidbody body;

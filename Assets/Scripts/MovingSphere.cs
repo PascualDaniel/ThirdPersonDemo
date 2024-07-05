@@ -28,8 +28,15 @@ public class MovingSphere : MonoBehaviour
 	bool onGround;
 	int jumpPhase;
 
+	float minGroundDotProduct;
+
+	void OnValidate () {
+		minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
+	}
+	
 	void Awake () {
 		body = GetComponent<Rigidbody>();
+		OnValidate();
 	}
     void Update () {
 		Vector2 playerInput;
@@ -83,7 +90,7 @@ public class MovingSphere : MonoBehaviour
 	void EvaluateCollision (Collision collision) {
 		for (int i = 0; i < collision.contactCount; i++) {
 			Vector3 normal = collision.GetContact(i).normal;
-			onGround |= normal.y >= 0.9f;
+			onGround |= normal.y >=  minGroundDotProduct;
 		}
 	}
 	void UpdateState () {

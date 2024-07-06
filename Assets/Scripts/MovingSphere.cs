@@ -27,8 +27,12 @@ public class MovingSphere : MonoBehaviour
     Rigidbody body;
 
 	bool desiredJump;
-	bool onGround;
+	
 	int jumpPhase;
+
+	int groundContactCount;
+
+	bool OnGround => groundContactCount > 0;
 
 	float minGroundDotProduct;
 
@@ -47,8 +51,6 @@ public class MovingSphere : MonoBehaviour
 		desiredJump |= Input.GetButtonDown("Jump");
 		playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 		
-
-		//Vector3 desiredVelocity =
 		desiredVelocity =
 			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
 	}
@@ -60,10 +62,14 @@ public class MovingSphere : MonoBehaviour
 			Jump();
 		}
         body.velocity = velocity;
-		onGround = false;
+		ClearState();
     }
+	void ClearState () {
+		groundContactCount = 0;
+		contactNormal = Vector3.zero;
+	}
 	void Jump() {
-		if (onGround || jumpPhase < maxAirJumps) {
+		if (OnGround  || jumpPhase < maxAirJumps) {
 			jumpPhase += 1;
 			float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
 			float alignedSpeed = Vector3.Dot(velocity, contactNormal);
@@ -87,15 +93,18 @@ public class MovingSphere : MonoBehaviour
 		for (int i = 0; i < collision.contactCount; i++) {
 			Vector3 normal = collision.GetContact(i).normal;
 			if (normal.y >= minGroundDotProduct) {
-				onGround = true;
+				groundContactCount += 1;
 				contactNormal = normal;
 			}
 		}
 	}
 	void UpdateState () {
 		velocity = body.velocity;
-		if (onGround) {
+		if (OnGround) {
 			jumpPhase = 0;
+			if (groundContactCount > 1) {
+				contactNormal.Normalize();
+			}
 		}else {
 			contactNormal = Vector3.up;
 		}
@@ -109,7 +118,7 @@ public class MovingSphere : MonoBehaviour
 		Vector3 zAxis = ProjectOnContactPlane(Vector3.forward).normalized;
 		float currentX = Vector3.Dot(velocity, xAxis);
 		float currentZ = Vector3.Dot(velocity, zAxis);
-		float acceleration = onGround ? maxAcceleration : maxAirAcceleration;
+		float acceleration = OnGround  ? maxAcceleration : maxAirAcceleration;
 		float maxSpeedChange = acceleration * Time.deltaTime;
 
 		float newX =

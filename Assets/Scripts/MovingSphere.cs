@@ -23,6 +23,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField, Range(0f, 100f)]
 	float maxSnapSpeed = 100f;
 
+	[SerializeField, Min(0f)]
+	float probeDistance = 1f;
+
     Vector3 velocity, desiredVelocity;
 
 	Vector3 contactNormal;
@@ -124,15 +127,18 @@ public class MovingSphere : MonoBehaviour
 		if (stepsSinceLastGrounded > 1) {
 			return false;
 		}
-		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit)) {
+		float speed = velocity.magnitude;
+		if (speed > maxSnapSpeed) {
+			return false;
+		}
+		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance)) {
 			return false;
 		}
 		if (hit.normal.y < minGroundDotProduct) {
 			return false;
 		}
 		groundContactCount = 1;
-		contactNormal = hit.normal;
-		float speed = velocity.magnitude;
+		contactNormal = hit.normal;	
 		float dot = Vector3.Dot(velocity, hit.normal);
 		if (dot > 0f) {
 			velocity = (velocity - hit.normal * dot).normalized * speed;

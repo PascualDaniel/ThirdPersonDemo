@@ -20,6 +20,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField, Range(0f, 90f)]
 	float maxGroundAngle = 25f;
 
+	[SerializeField, Range(0f, 100f)]
+	float maxSnapSpeed = 100f;
+
     Vector3 velocity, desiredVelocity;
 
 	Vector3 contactNormal;
@@ -35,6 +38,8 @@ public class MovingSphere : MonoBehaviour
 	bool OnGround => groundContactCount > 0;
 
 	float minGroundDotProduct;
+
+	int stepsSinceLastGrounded;
 
 	void OnValidate () {
 		minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -53,6 +58,10 @@ public class MovingSphere : MonoBehaviour
 		
 		desiredVelocity =
 			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
+
+		GetComponent<Renderer>().material.SetColor(
+			"_Color", OnGround ? Color.black : Color.white
+		);
 	}
     void FixedUpdate () {
 		UpdateState();
@@ -99,8 +108,10 @@ public class MovingSphere : MonoBehaviour
 		}
 	}
 	void UpdateState () {
+		stepsSinceLastGrounded += 1;
 		velocity = body.velocity;
-		if (OnGround) {
+		if (OnGround || SnapToGround()) {
+			stepsSinceLastGrounded = 0;
 			jumpPhase = 0;
 			if (groundContactCount > 1) {
 				contactNormal.Normalize();
@@ -108,6 +119,25 @@ public class MovingSphere : MonoBehaviour
 		}else {
 			contactNormal = Vector3.up;
 		}
+	}
+	bool SnapToGround () {
+		if (stepsSinceLastGrounded > 1) {
+			return false;
+		}
+		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit)) {
+			return false;
+		}
+		if (hit.normal.y < minGroundDotProduct) {
+			return false;
+		}
+		groundContactCount = 1;
+		contactNormal = hit.normal;
+		float speed = velocity.magnitude;
+		float dot = Vector3.Dot(velocity, hit.normal);
+		if (dot > 0f) {
+			velocity = (velocity - hit.normal * dot).normalized * speed;
+		}
+		return true;
 	}
 
 	Vector3 ProjectOnContactPlane (Vector3 vector) {

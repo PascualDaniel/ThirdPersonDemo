@@ -31,7 +31,7 @@ public class MovingSphere : MonoBehaviour
 
     Vector3 velocity, desiredVelocity;
 
-	Vector3 contactNormal;
+	Vector3 contactNormal, steepNormal;
 
     Rigidbody body;
 
@@ -39,9 +39,10 @@ public class MovingSphere : MonoBehaviour
 	
 	int jumpPhase;
 
-	int groundContactCount;
+	int groundContactCount, steepContactCount;
 
 	bool OnGround => groundContactCount > 0;
+	bool OnSteep => steepContactCount > 0;
 
 	float minGroundDotProduct, minStairsDotProduct;
 
@@ -85,8 +86,8 @@ public class MovingSphere : MonoBehaviour
 			minGroundDotProduct : minStairsDotProduct;
 	}
 	void ClearState () {
-		groundContactCount = 0;
-		contactNormal = Vector3.zero;
+		groundContactCount = steepContactCount = 0;
+		contactNormal = steepNormal = Vector3.zero;
 	}
 	void Jump() {
 		if (OnGround  || jumpPhase < maxAirJumps) {
@@ -117,14 +118,28 @@ public class MovingSphere : MonoBehaviour
 			if (normal.y >= minDot) {
 				groundContactCount += 1;
 				contactNormal = normal;
+			}else if (normal.y > -0.01f) {
+				steepContactCount += 1;
+				steepNormal += normal;
 			}
 		}
+	}
+	bool CheckSteepContacts () {
+		if (steepContactCount > 1) {
+			steepNormal.Normalize();
+			if (steepNormal.y >= minGroundDotProduct) {
+				groundContactCount = 1;
+				contactNormal = steepNormal;
+				return true;
+			}
+		}
+		return false;
 	}
 	void UpdateState () {
 		stepsSinceLastGrounded += 1;
 		stepsSinceLastJump += 1;
 		velocity = body.velocity;
-		if (OnGround || SnapToGround()) {
+		if (OnGround || SnapToGround()|| CheckSteepContacts()) {
 			stepsSinceLastGrounded = 0;
 			jumpPhase = 0;
 			if (groundContactCount > 1) {
@@ -134,6 +149,7 @@ public class MovingSphere : MonoBehaviour
 			contactNormal = Vector3.up;
 		}
 	}
+	
 	bool SnapToGround () {
 		if (stepsSinceLastGrounded > 1|| stepsSinceLastJump <= 2) {
 			return false;
@@ -160,6 +176,8 @@ public class MovingSphere : MonoBehaviour
 	Vector3 ProjectOnContactPlane (Vector3 vector) {
 		return vector - contactNormal * Vector3.Dot(vector, contactNormal);
 	}
+
+	
 	void AdjustVelocity () {
 		Vector3 xAxis = ProjectOnContactPlane(Vector3.right).normalized;
 		Vector3 zAxis = ProjectOnContactPlane(Vector3.forward).normalized;

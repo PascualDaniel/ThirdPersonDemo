@@ -26,6 +26,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField, Min(0f)]
 	float probeDistance = 1f;
 
+	[SerializeField]
+	LayerMask probeMask = -1;
+
     Vector3 velocity, desiredVelocity;
 
 	Vector3 contactNormal;
@@ -42,7 +45,7 @@ public class MovingSphere : MonoBehaviour
 
 	float minGroundDotProduct;
 
-	int stepsSinceLastGrounded;
+	int stepsSinceLastGrounded, stepsSinceLastJump;
 
 	void OnValidate () {
 		minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
@@ -82,6 +85,7 @@ public class MovingSphere : MonoBehaviour
 	}
 	void Jump() {
 		if (OnGround  || jumpPhase < maxAirJumps) {
+			stepsSinceLastJump = 0;
 			jumpPhase += 1;
 			float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
 			float alignedSpeed = Vector3.Dot(velocity, contactNormal);
@@ -112,6 +116,7 @@ public class MovingSphere : MonoBehaviour
 	}
 	void UpdateState () {
 		stepsSinceLastGrounded += 1;
+		stepsSinceLastJump += 1;
 		velocity = body.velocity;
 		if (OnGround || SnapToGround()) {
 			stepsSinceLastGrounded = 0;
@@ -124,14 +129,14 @@ public class MovingSphere : MonoBehaviour
 		}
 	}
 	bool SnapToGround () {
-		if (stepsSinceLastGrounded > 1) {
+		if (stepsSinceLastGrounded > 1|| stepsSinceLastJump <= 2) {
 			return false;
 		}
 		float speed = velocity.magnitude;
 		if (speed > maxSnapSpeed) {
 			return false;
 		}
-		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance)) {
+		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance, probeMask)) {
 			return false;
 		}
 		if (hit.normal.y < minGroundDotProduct) {

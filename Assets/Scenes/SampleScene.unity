@@ -2166,11 +2166,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c97229192115efa48b479029e51a3ecb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 41.3
-  maxAcceleration: 10
-  maxAirAcceleration: 1
+  maxSpeed: 10
+  maxAcceleration: 13.8
+  maxAirAcceleration: 2
   jumpHeight: 2
-  maxAirJumps: 2
+  maxAirJumps: 1
   maxGroundAngle: 25
   maxStairsAngle: 50
   maxSnapSpeed: 100
@@ -2309,7 +2309,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!43 &753560754
@@ -3665,6 +3665,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   focus: {fileID: 713911078}
   distance: 5
+  focusRadius: 1
+  focusCentering: 0.5
 --- !u!43 &1047953050
 Mesh:
   m_ObjectHideFlags: 0

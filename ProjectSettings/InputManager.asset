@@ -297,10 +297,10 @@ InputManager:
     m_Name: Vertical Camera
     descriptiveName: 
     descriptiveNegativeName: 
-    negativeButton: 
-    positiveButton: q
+    negativeButton: g
+    positiveButton: t
     altNegativeButton: 
-    altPositiveButton: q
+    altPositiveButton: 
     gravity: 1000
     dead: 0.001
     sensitivity: 1000
@@ -313,10 +313,10 @@ InputManager:
     m_Name: Horizontal Camera
     descriptiveName: 
     descriptiveNegativeName: 
-    negativeButton: 
+    negativeButton: q
     positiveButton: e
     altNegativeButton: 
-    altPositiveButton: e
+    altPositiveButton: 
     gravity: 1000
     dead: 0.001
     sensitivity: 1000

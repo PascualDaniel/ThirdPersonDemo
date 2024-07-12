@@ -25,8 +25,7 @@ public class OrbitCamera : MonoBehaviour {
 	[SerializeField, Range(0f, 90f)]
 	float alignSmoothRange = 45f;
 
-	[SerializeField]
-	Transform playerInputSpace = default;
+	
 
 	float lastManualRotationTime;
 

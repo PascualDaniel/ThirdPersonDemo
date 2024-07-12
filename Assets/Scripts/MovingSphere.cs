@@ -29,6 +29,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField]
 	LayerMask probeMask = -1, stairsMask = -1;
 
+	[SerializeField]
+	Transform playerInputSpace = default;
+
 	Vector3 velocity, desiredVelocity;
 
 	Vector3 contactNormal, steepNormal;
@@ -67,8 +70,15 @@ public class MovingSphere : MonoBehaviour
 		desiredJump |= Input.GetButtonDown("Jump");
 		playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
-		desiredVelocity =
-			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
+		if (playerInputSpace) {
+			desiredVelocity = playerInputSpace.TransformDirection(
+				playerInput.x, 0f, playerInput.y
+			) * maxSpeed;
+		}
+		else {
+			desiredVelocity =
+				new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
+		}
 
 		
 	}

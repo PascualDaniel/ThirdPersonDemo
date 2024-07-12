@@ -2181,6 +2181,7 @@ MonoBehaviour:
   stairsMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  playerInputSpace: {fileID: 963194228}
 --- !u!96 &713911080
 TrailRenderer:
   serializedVersion: 3
@@ -3667,6 +3668,11 @@ MonoBehaviour:
   distance: 5
   focusRadius: 1
   focusCentering: 0.5
+  rotationSpeed: 90
+  minVerticalAngle: -30
+  maxVerticalAngle: 60
+  alignDelay: 5
+  alignSmoothRange: 45
 --- !u!43 &1047953050
 Mesh:
   m_ObjectHideFlags: 0

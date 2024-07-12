@@ -22,6 +22,12 @@ public class OrbitCamera : MonoBehaviour {
 	[SerializeField, Min(0f)]
 	float alignDelay = 5f;
 
+	[SerializeField, Range(0f, 90f)]
+	float alignSmoothRange = 45f;
+
+	[SerializeField]
+	Transform playerInputSpace = default;
+
 	float lastManualRotationTime;
 
     Vector3 focusPoint, previousFocusPoint;
@@ -90,7 +96,15 @@ public class OrbitCamera : MonoBehaviour {
 			return false;
 		}
 		float headingAngle = GetAngle(movement / Mathf.Sqrt(movementDeltaSqr));
-		orbitAngles.y = headingAngle;
+		float deltaAbs = Mathf.Abs(Mathf.DeltaAngle(orbitAngles.y, headingAngle));
+		float rotationChange = rotationSpeed * Mathf.Min(Time.unscaledDeltaTime, movementDeltaSqr);
+		if (deltaAbs < alignSmoothRange) {
+			rotationChange *= deltaAbs / alignSmoothRange;
+		}else if (180f - deltaAbs < alignSmoothRange) {
+			rotationChange *= (180f - deltaAbs) / alignSmoothRange;
+		}
+		orbitAngles.y =
+			Mathf.MoveTowardsAngle(orbitAngles.y, headingAngle, rotationChange);
 		return true;
 	}
 	static float GetAngle (Vector2 direction) {

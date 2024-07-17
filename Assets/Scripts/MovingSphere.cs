@@ -32,6 +32,8 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField]
 	Transform playerInputSpace = default;
 
+	Vector3 upAxis;
+
 	Vector3 velocity, desiredVelocity;
 
 	Vector3 contactNormal, steepNormal;
@@ -89,6 +91,7 @@ public class MovingSphere : MonoBehaviour
 	}
 	void FixedUpdate()
 	{
+		upAxis = -Physics.gravity.normalized;
 		UpdateState();
 		AdjustVelocity();
 		if (desiredJump)
@@ -130,8 +133,8 @@ public class MovingSphere : MonoBehaviour
 		}
 		stepsSinceLastJump = 0;
 		jumpPhase += 1;
-		float jumpSpeed = Mathf.Sqrt(-2f * Physics.gravity.y * jumpHeight);
-		jumpDirection = (jumpDirection + Vector3.up).normalized;
+		float jumpSpeed = Mathf.Sqrt(2f * Physics.gravity.magnitude * jumpHeight);
+		jumpDirection = (jumpDirection + upAxis).normalized;
 		float alignedSpeed = Vector3.Dot(velocity, jumpDirection);
 		if (alignedSpeed > 0f)
 		{
@@ -202,7 +205,7 @@ public class MovingSphere : MonoBehaviour
 		}
 		else
 		{
-			contactNormal = Vector3.up;
+			contactNormal = upAxis;
 		}
 	}
 
@@ -217,7 +220,7 @@ public class MovingSphere : MonoBehaviour
 		{
 			return false;
 		}
-		if (!Physics.Raycast(body.position, Vector3.down, out RaycastHit hit, probeDistance, probeMask))
+		if (!Physics.Raycast(body.position, -upAxis, out RaycastHit hit, probeDistance, probeMask))
 		{
 			return false;
 		}

@@ -47,7 +47,8 @@ public class OrbitCamera : MonoBehaviour {
 	void LateUpdate () {
 		gravityAlignment =
 			Quaternion.FromToRotation(
-				gravityAlignment * Vector3.up, -Physics.gravity.normalized
+				gravityAlignment * Vector3.up,
+				CustomGravity.GetUpAxis(focusPoint)
 			) * gravityAlignment;
 		UpdateFocusPoint();
 		
@@ -126,7 +127,7 @@ public class OrbitCamera : MonoBehaviour {
 			Quaternion.Inverse(gravityAlignment) *
 			(focusPoint - previousFocusPoint);
 		Vector2 movement = new Vector2(alignedDelta.x, alignedDelta.z);
-		
+
 		float movementDeltaSqr = movement.sqrMagnitude;
 		if (movementDeltaSqr < 0.0001f) {
 			return false;

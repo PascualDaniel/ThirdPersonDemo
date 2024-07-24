@@ -1,6 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public static class CustomGravity {
+
+	static List<GravitySource> sources = new List<GravitySource>();
 
    public static Vector3 GetGravity (Vector3 position) {
 		return position.normalized * Physics.gravity.y;

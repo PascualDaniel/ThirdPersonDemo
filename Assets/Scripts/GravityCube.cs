@@ -136,7 +136,8 @@ public class GravityBox : GravitySource {
 			outside += 1;
 		}
 		if (outside > 0) {
-			float distance = vector.magnitude;
+			float distance = outside == 1 ?
+				Mathf.Abs(vector.x + vector.y + vector.z) : vector.magnitude;
 			if (distance > outerFalloffDistance) {
 				return Vector3.zero;
 			}

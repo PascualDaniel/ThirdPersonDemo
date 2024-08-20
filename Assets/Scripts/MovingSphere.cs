@@ -52,7 +52,7 @@ public class MovingSphere : MonoBehaviour
 	float minGroundDotProduct, minStairsDotProduct;
 
 	int stepsSinceLastGrounded, stepsSinceLastJump;
-	Vector3 connectionWorldPosition;
+	Vector3 connectionWorldPosition, connectionLocalPosition;
 
 	void OnValidate()
 	{
@@ -222,10 +222,14 @@ public class MovingSphere : MonoBehaviour
 	void UpdateConnectionState () {
 		if (connectedBody == previousConnectedBody) {
 			Vector3 connectionMovement =
-				connectedBody.position - connectionWorldPosition;
+				connectedBody.transform.TransformPoint(connectionLocalPosition) -
+				connectionWorldPosition;
 			connectionVelocity = connectionMovement / Time.deltaTime;
 		}
-		connectionWorldPosition = connectedBody.position;
+		connectionWorldPosition = body.position;
+		connectionLocalPosition = connectedBody.transform.InverseTransformPoint(
+			connectionWorldPosition
+		);
 	}
 
 	bool SnapToGround()

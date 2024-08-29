@@ -49,7 +49,7 @@ public class MovingSphere : MonoBehaviour
 
 	Rigidbody body, connectedBody, previousConnectedBody;
 
-	bool desiredJump;
+	bool desiredJump, desiresClimbing;
 
 	int jumpPhase;
 
@@ -65,7 +65,7 @@ public class MovingSphere : MonoBehaviour
 	int stepsSinceLastGrounded, stepsSinceLastJump;
 	Vector3 connectionWorldPosition, connectionLocalPosition;
 
-	bool Climbing => climbContactCount > 0;
+	bool Climbing => climbContactCount > 0 && stepsSinceLastJump > 2;
 
 	void OnValidate()
 	{
@@ -87,6 +87,7 @@ public class MovingSphere : MonoBehaviour
 		playerInput.x = Input.GetAxis("Horizontal");
 		playerInput.y = Input.GetAxis("Vertical");
 		desiredJump |= Input.GetButtonDown("Jump");
+		desiresClimbing = Input.GetButton("Climb");
 		playerInput = Vector2.ClampMagnitude(playerInput, 1f);
 
 		if (playerInputSpace) {
@@ -115,6 +116,10 @@ public class MovingSphere : MonoBehaviour
 		}
 		if (Climbing) {
 			velocity -= contactNormal * (maxClimbAcceleration * 0.9f  * Time.deltaTime);
+		}else if (desiresClimbing && OnGround) {
+			velocity +=
+				(gravity - contactNormal * (maxClimbAcceleration * 0.9f)) *
+				Time.deltaTime;
 		}
 		else {
 			velocity += gravity * Time.deltaTime;
@@ -196,7 +201,7 @@ public class MovingSphere : MonoBehaviour
 						connectedBody = collision.rigidbody;
 					}
 				}
-				if (upDot >= minClimbDotProduct  &&
+				if (desiresClimbing && upDot >= minClimbDotProduct  &&
 					(climbMask & (1 << layer)) != 0) {
 					climbContactCount += 1;
 					climbNormal += normal;
@@ -316,7 +321,7 @@ public class MovingSphere : MonoBehaviour
 		}
 		else {
 			acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
-			speed = maxSpeed;
+			speed = OnGround && desiresClimbing ? maxClimbSpeed : maxSpeed;
 			xAxis = rightAxis;
 			zAxis = forwardAxis;
 		}

@@ -6,10 +6,11 @@ public class MovingSphere : MonoBehaviour
 {
 
 	[SerializeField, Range(0f, 100f)]
-	float maxSpeed = 10f;
+	float maxSpeed = 10f, maxClimbSpeed = 2f;
 
 	[SerializeField, Range(0f, 100f)]
-	float maxAcceleration = 10f, maxAirAcceleration = 1f;
+	float maxAcceleration = 10f, maxAirAcceleration = 1f,
+		maxClimbAcceleration = 20f;
 
 	[SerializeField, Range(0f, 10f)]
 	float jumpHeight = 2f;
@@ -39,7 +40,10 @@ public class MovingSphere : MonoBehaviour
 
 	Vector3 upAxis, rightAxis, forwardAxis;
 
-	Vector3 velocity, desiredVelocity, connectionVelocity;
+	Vector2 playerInput;
+
+	
+	Vector3 velocity, connectionVelocity;
 
 	Vector3 contactNormal, steepNormal, climbNormal;
 
@@ -79,7 +83,7 @@ public class MovingSphere : MonoBehaviour
 	}
 	void Update()
 	{
-		Vector2 playerInput;
+
 		playerInput.x = Input.GetAxis("Horizontal");
 		playerInput.y = Input.GetAxis("Vertical");
 		desiredJump |= Input.GetButtonDown("Jump");
@@ -94,9 +98,6 @@ public class MovingSphere : MonoBehaviour
 			rightAxis = ProjectDirectionOnPlane(Vector3.right, upAxis);
 			forwardAxis = ProjectDirectionOnPlane(Vector3.forward, upAxis);
 		}
-		desiredVelocity =
-			new Vector3(playerInput.x, 0f, playerInput.y) * maxSpeed;
-		
 		
 		desiredJump |= Input.GetButtonDown("Jump");
 
@@ -112,7 +113,10 @@ public class MovingSphere : MonoBehaviour
 			desiredJump = false;
 			Jump(gravity);
 		}
-		if (!Climbing) {
+		if (Climbing) {
+			velocity -= contactNormal * (maxClimbAcceleration * 0.9f  * Time.deltaTime);
+		}
+		else {
 			velocity += gravity * Time.deltaTime;
 		}
 		body.velocity = velocity;
@@ -302,18 +306,32 @@ public class MovingSphere : MonoBehaviour
 
 	void AdjustVelocity()
 	{
-		Vector3 xAxis = ProjectDirectionOnPlane(rightAxis, contactNormal);
-		Vector3 zAxis = ProjectDirectionOnPlane(forwardAxis, contactNormal);
+		float acceleration, speed;
+		Vector3 xAxis, zAxis;
+		if (Climbing) {
+			acceleration = maxClimbAcceleration;
+			speed = maxClimbSpeed;
+			xAxis = Vector3.Cross(contactNormal, upAxis);
+			zAxis = upAxis;
+		}
+		else {
+			acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
+			speed = maxSpeed;
+			xAxis = rightAxis;
+			zAxis = forwardAxis;
+		}
+		xAxis = ProjectDirectionOnPlane(xAxis, contactNormal);
+		zAxis = ProjectDirectionOnPlane(zAxis, contactNormal);
 		Vector3 relativeVelocity = velocity - connectionVelocity;
 		float currentX = Vector3.Dot(relativeVelocity, xAxis);
 		float currentZ = Vector3.Dot(relativeVelocity, zAxis);
-		float acceleration = OnGround ? maxAcceleration : maxAirAcceleration;
+		
 		float maxSpeedChange = acceleration * Time.deltaTime;
 
 		float newX =
-			Mathf.MoveTowards(currentX, desiredVelocity.x, maxSpeedChange);
+			Mathf.MoveTowards(currentX, playerInput.x * speed, maxSpeedChange);
 		float newZ =
-			Mathf.MoveTowards(currentZ, desiredVelocity.z, maxSpeedChange);
+			Mathf.MoveTowards(currentZ, playerInput.y * speed, maxSpeedChange);
 
 		velocity += xAxis * (newX - currentX) + zAxis * (newZ - currentZ);
 	}

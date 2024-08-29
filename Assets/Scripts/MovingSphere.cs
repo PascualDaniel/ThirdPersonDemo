@@ -27,19 +27,21 @@ public class MovingSphere : MonoBehaviour
 	float probeDistance = 1f;
 
 	[SerializeField]
-	LayerMask probeMask = -1, stairsMask = -1;
+	LayerMask probeMask = -1, stairsMask = -1, climbMask = -1;
 
 	[SerializeField]
 	Transform playerInputSpace = default;
 
 	[SerializeField, Range(90, 180)]
 	float maxClimbAngle = 140f;
+	[SerializeField]
+	Material normalMaterial = default, climbingMaterial = default;
 
 	Vector3 upAxis, rightAxis, forwardAxis;
 
 	Vector3 velocity, desiredVelocity, connectionVelocity;
 
-	Vector3 contactNormal, steepNormal;
+	Vector3 contactNormal, steepNormal, climbNormal;
 
 	Rigidbody body, connectedBody, previousConnectedBody;
 
@@ -47,7 +49,7 @@ public class MovingSphere : MonoBehaviour
 
 	int jumpPhase;
 
-	int groundContactCount, steepContactCount;
+	int groundContactCount, steepContactCount, climbContactCount;
 
 	bool OnGround => groundContactCount > 0;
 	bool OnSteep => steepContactCount > 0;
@@ -57,6 +59,8 @@ public class MovingSphere : MonoBehaviour
 
 	int stepsSinceLastGrounded, stepsSinceLastJump;
 	Vector3 connectionWorldPosition, connectionLocalPosition;
+
+	bool Climbing => climbContactCount > 0;
 
 	void OnValidate()
 	{
@@ -117,8 +121,8 @@ public class MovingSphere : MonoBehaviour
 	}
 	void ClearState()
 	{
-		groundContactCount = steepContactCount = 0;
-		contactNormal = steepNormal = connectionVelocity = Vector3.zero;
+		groundContactCount = steepContactCount = climbContactCount = 0;
+		contactNormal = steepNormal = climbNormal = Vector3.zero;
 		previousConnectedBody = connectedBody;
 		connectedBody = null;
 	}
@@ -166,7 +170,8 @@ public class MovingSphere : MonoBehaviour
 	}
 
 	void EvaluateCollision (Collision collision) {
-		float minDot = GetMinDot(collision.gameObject.layer);
+		int layer = collision.gameObject.layer;
+		float minDot = GetMinDot(layer);
 		for (int i = 0; i < collision.contactCount; i++) {
 			Vector3 normal = collision.GetContact(i).normal;
 			float upDot = Vector3.Dot(upAxis, normal);
@@ -175,14 +180,22 @@ public class MovingSphere : MonoBehaviour
 				contactNormal += normal;
 				connectedBody = collision.rigidbody;
 			}
-			else if (upDot > -0.01f) {
-				steepContactCount += 1;
-				steepNormal += normal;
-				if (groundContactCount == 0) {
+			else {
+				if (upDot > -0.01f) {
+					steepContactCount += 1;
+					steepNormal += normal;
+					if (groundContactCount == 0) {
+						connectedBody = collision.rigidbody;
+					}
+				}
+				if (upDot >= minClimbDotProduct  &&
+					(climbMask & (1 << layer)) != 0) {
+					climbContactCount += 1;
+					climbNormal += normal;
 					connectedBody = collision.rigidbody;
 				}
 			}
-		}
+	}
 	}
 	bool CheckSteepContacts()
 	{

@@ -2304,7 +2304,7 @@ Transform:
   m_GameObject: {fileID: 713911074}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 153.5, y: 1.1, z: -8.5}
+  m_LocalPosition: {x: 130.8, y: 1.1, z: -20.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2338,6 +2338,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   playerInputSpace: {fileID: 963194228}
+  maxClimbAngle: 140
 --- !u!96 &713911080
 TrailRenderer:
   serializedVersion: 3
@@ -4053,13 +4054,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1182438483}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 25.720001, y: 0.24666668, z: -1.8400003}
   m_LocalScale: {x: 2.7093866, y: 0.2017, z: 0.5426519}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1167859360}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!1 &1186264510
 GameObject:
   m_ObjectHideFlags: 0

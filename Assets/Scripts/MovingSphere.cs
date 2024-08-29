@@ -32,6 +32,9 @@ public class MovingSphere : MonoBehaviour
 	[SerializeField]
 	Transform playerInputSpace = default;
 
+	[SerializeField, Range(90, 180)]
+	float maxClimbAngle = 140f;
+
 	Vector3 upAxis, rightAxis, forwardAxis;
 
 	Vector3 velocity, desiredVelocity, connectionVelocity;
@@ -49,7 +52,8 @@ public class MovingSphere : MonoBehaviour
 	bool OnGround => groundContactCount > 0;
 	bool OnSteep => steepContactCount > 0;
 
-	float minGroundDotProduct, minStairsDotProduct;
+	float minGroundDotProduct, minStairsDotProduct, minClimbDotProduct;
+
 
 	int stepsSinceLastGrounded, stepsSinceLastJump;
 	Vector3 connectionWorldPosition, connectionLocalPosition;
@@ -58,6 +62,7 @@ public class MovingSphere : MonoBehaviour
 	{
 		minGroundDotProduct = Mathf.Cos(maxGroundAngle * Mathf.Deg2Rad);
 		minStairsDotProduct = Mathf.Cos(maxStairsAngle * Mathf.Deg2Rad);
+		minClimbDotProduct = Mathf.Cos(maxClimbAngle * Mathf.Deg2Rad);
 	}
 
 	void Awake()

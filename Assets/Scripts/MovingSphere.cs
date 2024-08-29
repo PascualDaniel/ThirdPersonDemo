@@ -56,6 +56,7 @@ public class MovingSphere : MonoBehaviour
 
 	float minGroundDotProduct, minStairsDotProduct, minClimbDotProduct;
 
+	MeshRenderer meshRenderer;
 
 	int stepsSinceLastGrounded, stepsSinceLastJump;
 	Vector3 connectionWorldPosition, connectionLocalPosition;
@@ -73,6 +74,7 @@ public class MovingSphere : MonoBehaviour
 	{
 		body = GetComponent<Rigidbody>();
 		body.useGravity = false;
+		meshRenderer = GetComponent<MeshRenderer>();
 		OnValidate();
 	}
 	void Update()
@@ -98,7 +100,7 @@ public class MovingSphere : MonoBehaviour
 		
 		desiredJump |= Input.GetButtonDown("Jump");
 
-		
+		meshRenderer.material = Climbing ? climbingMaterial : normalMaterial;
 	}
 	void FixedUpdate()
 	{

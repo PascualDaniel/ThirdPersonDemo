@@ -45,7 +45,7 @@ public class MovingSphere : MonoBehaviour
 	
 	Vector3 velocity, connectionVelocity;
 
-	Vector3 contactNormal, steepNormal, climbNormal;
+	Vector3 contactNormal, steepNormal, climbNormal, lastClimbNormal;
 
 	Rigidbody body, connectedBody, previousConnectedBody;
 
@@ -116,7 +116,13 @@ public class MovingSphere : MonoBehaviour
 		}
 		if (Climbing) {
 			velocity -= contactNormal * (maxClimbAcceleration * 0.9f  * Time.deltaTime);
-		}else if (desiresClimbing && OnGround) {
+		}
+		else if (OnGround && velocity.sqrMagnitude < 0.01f) {
+			velocity +=
+				contactNormal *
+				(Vector3.Dot(gravity, contactNormal) * Time.deltaTime);
+		}
+		else if (desiresClimbing && OnGround) {
 			velocity +=
 				(gravity - contactNormal * (maxClimbAcceleration * 0.9f)) *
 				Time.deltaTime;
@@ -191,6 +197,7 @@ public class MovingSphere : MonoBehaviour
 			if (upDot >= minDot) {
 				groundContactCount += 1;
 				contactNormal += normal;
+				lastClimbNormal = normal;
 				connectedBody = collision.rigidbody;
 			}
 			else {
@@ -265,7 +272,14 @@ public class MovingSphere : MonoBehaviour
 
 	bool CheckClimbing () {
 		if (Climbing) {
-			groundContactCount = climbContactCount;
+			if (climbContactCount > 1) {
+				climbNormal.Normalize();
+				float upDot = Vector3.Dot(upAxis, climbNormal);
+				if (upDot >= minGroundDotProduct) {
+					climbNormal = lastClimbNormal;
+				}
+			}
+			groundContactCount = 1;
 			contactNormal = climbNormal;
 			return true;
 		}

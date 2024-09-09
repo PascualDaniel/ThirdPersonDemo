@@ -297,8 +297,10 @@ public class MovingSphere : MonoBehaviour
 		{
 			return false;
 		}
-		if (!Physics.Raycast(body.position, -upAxis, out RaycastHit hit, probeDistance, probeMask))
-		{
+		if (!Physics.Raycast(
+			body.position, -upAxis, out RaycastHit hit,
+			probeDistance, probeMask, QueryTriggerInteraction.Ignore
+		)) {
 			return false;
 		}
 		float upDot = Vector3.Dot(upAxis, hit.normal);
